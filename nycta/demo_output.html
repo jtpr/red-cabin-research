@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[M] MTA Train Timing — DEMO</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #c8c8c8;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      padding: 24px 16px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .demo-notice {
+      background: #1a1a00;
+      border: 1px solid #554400;
+      color: #ccaa00;
+      padding: 8px 14px;
+      margin-bottom: 16px;
+      font-size: 0.85em;
+    }
+
+    .board {
+      border: 1px solid #333;
+      padding: 20px;
+    }
+
+    .board-header {
+      color: #f4a623;
+      font-size: 1.1em;
+      font-weight: bold;
+      letter-spacing: 2px;
+      border-bottom: 2px solid #f4a623;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+
+    .timestamp {
+      color: #888;
+      font-size: 0.85em;
+      float: right;
+      font-weight: normal;
+      letter-spacing: 0;
+    }
+
+    .map-section { margin-bottom: 24px; }
+    .map-label { color: #555; font-size: 0.8em; margin-bottom: 6px; }
+
+    .route-map {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 4px 0;
+      font-size: 0.95em;
+    }
+
+    .stop-names-a, .stop-names-b {
+      overflow-x: auto;
+      white-space: nowrap;
+      color: #444;
+      font-size: 0.78em;
+      letter-spacing: 0;
+    }
+
+    .stop-normal  { color: #5bc0de; cursor: default; }
+    .stop-active  { color: #f4a623; font-size: 1.1em; cursor: default; }
+    .track        { color: #223; }
+
+    .direction-block { margin-bottom: 20px; }
+
+    .dir-header {
+      color: #f4a623;
+      font-weight: bold;
+      margin-bottom: 6px;
+      font-size: 0.95em;
+    }
+
+    .departure-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .departure-table th {
+      color: #444;
+      font-size: 0.8em;
+      text-align: left;
+      border-bottom: 1px solid #222;
+      padding: 2px 8px 4px 4px;
+    }
+
+    .departure-table td {
+      padding: 3px 8px 3px 4px;
+      border-bottom: 1px solid #1a1a1a;
+      vertical-align: middle;
+    }
+
+    .stop-name {
+      color: #aaa;
+      min-width: 200px;
+    }
+
+    .times { white-space: nowrap; }
+
+    .time {
+      display: inline-block;
+      min-width: 36px;
+      text-align: center;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-right: 4px;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .time-now  { color: #0d0d0d; background: #e53e3e; }
+    .time-soon { color: #0d0d0d; background: #d69e2e; }
+    .time-ok   { color: #276749; background: #9ae6b4; }
+
+    .board-footer {
+      color: #333;
+      font-size: 0.75em;
+      border-top: 1px solid #1e1e1e;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #1e1e1e;
+      margin: 14px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-notice">
+    ⚠ DEMO — static mockup showing the page layout. Live version requires your MTA API key.
+  </div>
+
+  <div class="board">
+
+    <div class="board-header">
+      [M] MTA REAL-TIME DEPARTURES
+      <span class="timestamp">Updated 3:42 PM</span>
+    </div>
+
+    <div class="map-section">
+      <div class="map-label">ROUTE MAP  (● = train arriving in ≤2 min)</div>
+      <div class="route-map">
+        <span class="stop-active" title="Middle Village">●</span><span class="track">────</span>
+        <span class="stop-normal" title="Fresh Pond Rd">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Forest Ave">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Woodhaven Blvd">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Cypress Hills">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Myrtle Ave">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Kosciuszko St">○</span><span class="track">────</span>
+        <span class="stop-active" title="Myrtle-Wyckoff">●</span><span class="track">────</span>
+        <span class="stop-normal" title="Forest Hills 71">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Woodhaven Blvd (Q)">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Jackson Hts">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Times Sq">○</span><span class="track">────</span>
+        <span class="stop-normal" title="34 St Herald">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Canal St">○</span><span class="track">────</span>
+        <span class="stop-normal" title="Fulton St">○</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="direction-block">
+      <div class="dir-header">▶ Manhattan-bound / Forest Hills</div>
+      <table class="departure-table">
+        <thead>
+          <tr><th>Stop</th><th>Departures</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="stop-name">Middle Village–Metropolitan Av</td>
+            <td class="times">
+              <span class="time time-now" title="3:42pm">now</span>
+              <span class="time time-ok"  title="3:49pm">7m</span>
+              <span class="time time-ok"  title="3:58pm">16m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Fresh Pond Rd</td>
+            <td class="times">
+              <span class="time time-soon" title="3:44pm">2m</span>
+              <span class="time time-ok"   title="3:51pm">9m</span>
+              <span class="time time-ok"   title="4:00pm">18m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Myrtle Ave</td>
+            <td class="times">
+              <span class="time time-ok" title="3:48pm">6m</span>
+              <span class="time time-ok" title="3:55pm">13m</span>
+              <span class="time time-ok" title="4:04pm">22m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Myrtle–Wyckoff Avs</td>
+            <td class="times">
+              <span class="time time-now" title="3:42pm">now</span>
+              <span class="time time-ok"  title="3:51pm">9m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Times Sq–42 St</td>
+            <td class="times">
+              <span class="time time-ok" title="3:56pm">14m</span>
+              <span class="time time-ok" title="4:06pm">24m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">34 St–Herald Sq</td>
+            <td class="times">
+              <span class="time time-ok" title="3:58pm">16m</span>
+              <span class="time time-ok" title="4:08pm">26m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Canal St</td>
+            <td class="times">
+              <span class="time time-ok" title="4:02pm">20m</span>
+              <span class="time time-ok" title="4:12pm">30m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Fulton St</td>
+            <td class="times">
+              <span class="time time-ok" title="4:05pm">23m</span>
+              <span class="time time-ok" title="4:16pm">34m</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="divider">
+
+    <div class="direction-block">
+      <div class="dir-header">▶ Middle Village-bound</div>
+      <table class="departure-table">
+        <thead>
+          <tr><th>Stop</th><th>Departures</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="stop-name">Fulton St</td>
+            <td class="times">
+              <span class="time time-soon" title="3:45pm">3m</span>
+              <span class="time time-ok"   title="3:54pm">12m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Canal St</td>
+            <td class="times">
+              <span class="time time-ok" title="3:48pm">6m</span>
+              <span class="time time-ok" title="3:57pm">15m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">34 St–Herald Sq</td>
+            <td class="times">
+              <span class="time time-ok" title="3:52pm">10m</span>
+              <span class="time time-ok" title="4:01pm">19m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Times Sq–42 St</td>
+            <td class="times">
+              <span class="time time-ok" title="3:54pm">12m</span>
+              <span class="time time-ok" title="4:03pm">21m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Myrtle–Wyckoff Avs</td>
+            <td class="times">
+              <span class="time time-ok" title="4:03pm">21m</span>
+              <span class="time time-ok" title="4:12pm">30m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Myrtle Ave</td>
+            <td class="times">
+              <span class="time time-ok" title="4:06pm">24m</span>
+              <span class="time time-ok" title="4:15pm">33m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Fresh Pond Rd</td>
+            <td class="times">
+              <span class="time time-ok" title="4:10pm">28m</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="stop-name">Middle Village–Metropolitan Av</td>
+            <td class="times">
+              <span class="time time-ok" title="4:13pm">31m</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="board-footer">
+      Page auto-refreshes every 30 seconds &nbsp;•&nbsp;
+      Data: MTA GTFS-Realtime &nbsp;•&nbsp;
+      🔴 arriving ≤2m &nbsp; 🟡 ≤5m &nbsp; 🟢 comfortable
+    </div>
+
+  </div>
+
+</body>
+</html>

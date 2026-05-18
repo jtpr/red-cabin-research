@@ -1,0 +1,15 @@
+# MTA ASCII Train Timing — Dependencies
+# Install with: pip install -r requirements.txt
+
+# Fetches and parses GTFS-realtime protobuf feeds from the MTA API
+nyct-gtfs==1.0.5
+
+# HTTP requests to the MTA API endpoint
+requests==2.31.0
+
+# Timezone-aware datetime handling (MTA times are US/Eastern)
+pytz==2024.1
+
+# Jupyter Notebook support (optional, only needed if running .ipynb)
+notebook==7.1.2
+ipykernel==6.29.3
